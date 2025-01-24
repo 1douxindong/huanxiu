@@ -10,6 +10,6 @@ git add .
 git commit -m "Dashboard update: $current_time"
 
 # 推送到远程仓库
-git push origin main
+git push 
 
 echo "😄部署完成！提交时间: $current_time"
