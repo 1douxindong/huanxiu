@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Index</title>
+    <title>Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,6 +40,10 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
         .day:hover {
             transform: translateY(-2px);
@@ -212,10 +216,111 @@
                 width: 160px;
             }
         }
+        
+        .version-number {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .version-number {
+                font-size: 10px;
+            }
+        }
+        
+        /* 添加功能列表弹窗样式 */
+        .feature-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+            max-width: 90%;
+            width: 320px;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .feature-modal.show {
+            display: block;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .feature-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .feature-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .modal-overlay.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-modal {
+                width: 280px;
+            }
+            
+            .modal-title {
+                font-size: 16px;
+            }
+            
+            .feature-item {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1 class="page-title">数据看板日历</h1>
+    <h1 class="page-title">幻休数据日历</h1>
     <div class="calendar">
         <div class="calendar-header">
             <button class="nav-button" onclick="changeMonth(-1)">上个月</button>
@@ -245,18 +350,47 @@
         </div>
     </div>
 
+    <!-- 添加功能列表弹窗 -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="feature-modal" id="featureModal">
+        <div class="modal-header">
+            <h3 class="modal-title">版本功能列表</h3>
+            <button class="close-button" onclick="closeFeatureModal()">&times;</button>
+        </div>
+        <ul class="feature-list" id="featureList"></ul>
+    </div>
+
     <script>
         // 有效的日期链接
         const validDates = [
-            '2024-12-30', '2024-12-31',
-            '2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05',
-            '2025-01-06', '2025-01-07', '2025-01-08', '2025-01-09', '2025-01-10',
-            '2025-01-11', '2025-01-12', '2025-01-13', '2025-01-14', '2025-01-15',
-            '2025-01-16', '2025-01-17', '2025-01-18', '2025-01-19', '2025-01-20',
-            '2025-01-21', '2025-01-22', '2025-01-23', '2025-01-24', 
-            // '2025-01-25',
-            // '2025-01-26', '2025-01-27', '2025-01-28', '2025-01-29', '2025-01-30',
-            // '2025-01-31'
+            {date: '2024-12-30', version: ''},
+            {date: '2024-12-31', version: ''},
+            {date: '2025-01-01', version: ''},
+            {date: '2025-01-02', version: ''},
+            {date: '2025-01-03', version: ''},
+            {date: '2025-01-04', version: ''},
+            {date: '2025-01-05', version: ''},
+            {date: '2025-01-06', version: ''},
+            {date: '2025-01-07', version: ''},
+            {date: '2025-01-08', version: ''},
+            {date: '2025-01-09', version: ''},
+            {date: '2025-01-10', version: ''},
+            {date: '2025-01-11', version: ''},
+            {date: '2025-01-12', version: ''},
+            {date: '2025-01-13', version: ''},
+            {date: '2025-01-14', version: ''},
+            {date: '2025-01-15', version: ''},
+            {date: '2025-01-16', version: ''},
+            {date: '2025-01-17', version: ''},
+            {date: '2025-01-18', version: ''},
+            {date: '2025-01-19', version: ''},
+            {date: '2025-01-20', version: ''},
+            {date: '2025-01-21', version: ''},
+            {date: '2025-01-22', version: ''},
+            {date: '2025-01-23', version: ''},
+            {date: '2025-01-24', version: '2.9.46'},
+            // {date: '2025-01-25', version: ''},
+            // {date: '2025-01-26', version: ''},
         ];
         let currentYear = 2025;
         let currentMonth = 0;  // 0 表示一月
@@ -280,9 +414,9 @@
             // 添加日期
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const date = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const isValid = validDates.includes(date);
+                const dateInfo = validDates.find(d => d.date === date);
                 
-                const dayElement = createDayElement(day, isValid ? date : null);
+                const dayElement = createDayElement(day, dateInfo);
                 calendar.appendChild(dayElement);
             }
         }
@@ -326,42 +460,78 @@
             };
         }
         
-        function createDayElement(content, link = null) {
+        function createDayElement(content, dateInfo = null) {
             const div = document.createElement('div');
-            div.className = 'day' + (content === '' ? ' inactive' : '') + (link ? ' active' : '');
-            div.textContent = content;
+            div.className = 'day' + (content === '' ? ' inactive' : '') + (dateInfo ? ' active' : '');
             
-            if (link) {
-                // 修改事件处理逻辑
-                const handleClick = (e) => {
+            if (dateInfo) {
+                // 创建日期数字的 span
+                const dateSpan = document.createElement('span');
+                dateSpan.textContent = content;
+                
+                // 创建版本号的 span
+                const versionSpan = document.createElement('span');
+                versionSpan.className = 'version-number';
+                versionSpan.textContent = dateInfo.version;
+                if (dateInfo.version) {
+                    versionSpan.style.cursor = 'pointer';
+                    versionSpan.title = '点击查看版本功能';
+                }
+                
+                // 将两个 span 添加到日期单元格中
+                div.appendChild(dateSpan);
+                div.appendChild(versionSpan);
+                
+                // 整个日期区域的点击事件 - 跳转
+                const handleDayClick = (e) => {
+                    // 如果点击的是版本号，不执行跳转
+                    if (e.target === versionSpan) {
+                        return;
+                    }
                     e.preventDefault();
                     e.stopPropagation();
                     const loading = showLoading();
-                    
-                    // 模拟网络请求延迟
                     setTimeout(() => {
                         loading.complete();
-                        window.location.href = `./${link}.html`;
+                        window.location.href = `./${dateInfo.date}.html`;
                     }, 1500);
                 };
                 
-                // 移除 touchend，改用 touchstart
+                // 版本号点击事件 - 显示功能列表
+                const handleVersionClick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (dateInfo.version) {
+                        showFeatureModal(dateInfo.version);
+                    }
+                };
+                
+                // 为整个日期区域添加点击事件
+                div.addEventListener('click', handleDayClick);
                 div.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    handleClick(e);
+                    handleDayClick(e);
                 }, { passive: false });
                 
-                // 保留 click 事件作为桌面端备选
-                div.addEventListener('click', handleClick, false);
+                // 为版本号添加点击事件
+                if (dateInfo.version) {
+                    versionSpan.addEventListener('click', handleVersionClick);
+                    versionSpan.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        handleVersionClick(e);
+                    }, { passive: false });
+                }
+                
+                div.style.cursor = 'pointer';
                 div.title = '点击查看详情';
-            } else if (content !== '') {
+            } else {
+                div.textContent = content;
                 const handleInactiveClick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     showToast('数据暂无');
                 };
                 
-                // 同样修改无效日期的事件处理
                 div.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     handleInactiveClick(e);
@@ -406,6 +576,52 @@
             }
             lastTouchEnd = now;
         }, false);
+        
+        // 添加版本功能列表数据
+        const versionFeatures = {
+            '2.9.46': [
+                '优化了战斗系统性能',
+                '修复了部分界面显示问题',
+                '新增角色养成功能',
+                '调整了部分技能效果'
+            ]
+            // 可以继续添加其他版本的功能列表
+        };
+        
+        function showFeatureModal(version) {
+            const modal = document.getElementById('featureModal');
+            const overlay = document.getElementById('modalOverlay');
+            const featureList = document.getElementById('featureList');
+            
+            // 清空并填充功能列表
+            featureList.innerHTML = '';
+            if (versionFeatures[version]) {
+                versionFeatures[version].forEach(feature => {
+                    const li = document.createElement('li');
+                    li.className = 'feature-item';
+                    li.textContent = feature;
+                    featureList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'feature-item';
+                li.textContent = '暂无功能列表';
+                featureList.appendChild(li);
+            }
+            
+            modal.classList.add('show');
+            overlay.classList.add('show');
+        }
+        
+        function closeFeatureModal() {
+            const modal = document.getElementById('featureModal');
+            const overlay = document.getElementById('modalOverlay');
+            modal.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        
+        // 点击遮罩层关闭弹窗
+        document.getElementById('modalOverlay').addEventListener('click', closeFeatureModal);
     </script>
 </body>
 </html>
