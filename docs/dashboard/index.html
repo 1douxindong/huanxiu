@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>仪表板日历</title>
+    <title>幻休看板日历</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -127,6 +127,10 @@
             h2 {
                 font-size: 18px !important;
             }
+            .page-title {
+                font-size: 24px;
+                margin: 15px 0;
+            }
         }
         
         /* 修复移动端点击问题 */
@@ -148,9 +152,68 @@
             color: white;
             transform: scale(0.95);
         }
+        
+        /* 添加页面标题样式 */
+        .page-title {
+            text-align: center;
+            color: #4a90e2;
+            font-size: 28px;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+        
+        /* Loading 样式 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-text {
+            color: #4a90e2;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .progress-container {
+            width: 200px;
+            height: 4px;
+            background-color: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #4a90e2;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .loading-text {
+                font-size: 16px;
+            }
+            .progress-container {
+                width: 160px;
+            }
+        }
     </style>
 </head>
 <body>
+    <h1 class="page-title">幻休看板日历</h1>
     <div class="calendar">
         <div class="calendar-header">
             <button class="nav-button" onclick="changeMonth(-1)">上个月</button>
@@ -171,6 +234,14 @@
 
     <!-- 添加 Toast 元素 -->
     <div id="toast" class="toast"></div>
+
+    <!-- 添加 Loading 元素 -->
+    <div class="loading-overlay" id="loading">
+        <div class="loading-text">正在加载，请稍等...</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+    </div>
 
     <script>
         // 有效的日期链接
@@ -224,6 +295,35 @@
             }, duration);
         }
         
+        function showLoading() {
+            const loading = document.getElementById('loading');
+            const progress = document.getElementById('progress');
+            loading.classList.add('show');
+            
+            // 模拟加载进度
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 90) {
+                    clearInterval(interval);
+                } else {
+                    width += Math.random() * 30;
+                    if (width > 90) width = 90;
+                    progress.style.width = width + '%';
+                }
+            }, 500);
+            
+            return {
+                complete: () => {
+                    progress.style.width = '100%';
+                    setTimeout(() => {
+                        loading.classList.remove('show');
+                        progress.style.width = '0%';
+                    }, 500);
+                    clearInterval(interval);
+                }
+            };
+        }
+        
         function createDayElement(content, link = null) {
             const div = document.createElement('div');
             div.className = 'day' + (content === '' ? ' inactive' : '') + (link ? ' active' : '');
@@ -233,7 +333,13 @@
                 // 使用 touchend 和 click 事件
                 const handleClick = (e) => {
                     e.preventDefault();
-                    window.location.href = `./${link}.html`;
+                    const loading = showLoading();
+                    
+                    // 模拟网络请求延迟
+                    setTimeout(() => {
+                        loading.complete();
+                        window.location.href = `./${link}.html`;
+                    }, 1500);
                 };
                 
                 div.addEventListener('touchend', handleClick, false);
