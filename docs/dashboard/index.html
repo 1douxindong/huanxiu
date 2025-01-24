@@ -330,9 +330,10 @@
             div.textContent = content;
             
             if (link) {
-                // 使用 touchend 和 click 事件
+                // 修改事件处理逻辑
                 const handleClick = (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     const loading = showLoading();
                     
                     // 模拟网络请求延迟
@@ -342,16 +343,28 @@
                     }, 1500);
                 };
                 
-                div.addEventListener('touchend', handleClick, false);
+                // 移除 touchend，改用 touchstart
+                div.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleClick(e);
+                }, { passive: false });
+                
+                // 保留 click 事件作为桌面端备选
                 div.addEventListener('click', handleClick, false);
                 div.title = '点击查看详情';
             } else if (content !== '') {
                 const handleInactiveClick = (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     showToast('数据暂无');
                 };
                 
-                div.addEventListener('touchend', handleInactiveClick, false);
+                // 同样修改无效日期的事件处理
+                div.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleInactiveClick(e);
+                }, { passive: false });
+                
                 div.addEventListener('click', handleInactiveClick, false);
             }
             
@@ -372,11 +385,15 @@
         
         createCalendar();
         
-        // 防止 iOS 上的双击缩放
+        // 修改触摸事件处理
         document.addEventListener('touchstart', function(event) {
             if (event.touches.length > 1) {
                 event.preventDefault();
             }
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', function(event) {
+            event.preventDefault();
         }, { passive: false });
         
         let lastTouchEnd = 0;
